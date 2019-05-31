@@ -2,6 +2,7 @@
 
 Crypto data fetcher is a simple wrapper of the [Cryptowatch REST API](https://cryptowat.ch/docs/api) OHLCV endpoint, providing useful features such as:
 
+- Fetch OHLCV data on various exchanges and various pairs
 - Recording fetched data in a hdf5 file
 - Querying only missing data (according to existing h5 records)
 
