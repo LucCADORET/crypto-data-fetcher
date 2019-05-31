@@ -31,10 +31,10 @@ Fetch the requested pair from the cryptowatch API. At the beginning, we force "a
 '''
 
 
-def fetch_pair(pair, period, after=1):
-    url_base = 'https://api.cryptowat.ch/markets/kraken'
-    url_full = "{}/{}/ohlc?periods={}".format(
-        url_base, pair, periods_dict[period])
+def fetch_pair(exchange, pair, period, after=1):
+    url_base = 'https://api.cryptowat.ch/markets'
+    url_full = "{}/{}/{}/ohlc?periods={}".format(
+        url_base, exchange, pair, periods_dict[period])
     url_full = url_full + '&after={}'.format(after)
     resp = requests.get(url=url_full)
     data = resp.json()["result"]
@@ -53,7 +53,7 @@ def fetch_data(filepath, exchange, pair, period):
 
         # Set doesnt exist, we'll create it
         if datapath not in f:
-            new_data = fetch_pair(pair, period)
+            new_data = fetch_pair(exchange, pair, period)
             f.create_dataset(datapath, data=new_data,
                              maxshape=(None, 7), compression="gzip")
 
@@ -63,10 +63,11 @@ def fetch_data(filepath, exchange, pair, period):
             last_row = dset[-1]
             # The '+1' is made to ensure that the last data in the set won't be re-fetched
             last_timestamp = int(last_row[0])+1
-            new_data = fetch_pair(pair, period, after=last_timestamp)
+            new_data = fetch_pair(exchange, pair, period, after=last_timestamp)
             new_data_size = new_data.shape[0]
-            dset.resize(dset.shape[0] + new_data_size, axis=0)
-            dset[-new_data_size:] = new_data
+            if(new_data_size > 0):
+                dset.resize(dset.shape[0] + new_data_size, axis=0)
+                dset[-new_data_size:] = new_data
 
 
 '''

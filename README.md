@@ -15,7 +15,6 @@ Install required packages:
 ```
 pip3 install logging time schedule argparse requests numpy pandas datetime h5py --user
 ```
-
 ## Usage
 
 ```
