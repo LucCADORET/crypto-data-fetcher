@@ -31,12 +31,11 @@ Fetch the requested pair from the cryptowatch API. At the beginning, we force "a
 '''
 
 
-def fetch_pair(pair, period, after=None):
+def fetch_pair(pair, period, after=1):
     url_base = 'https://api.cryptowat.ch/markets/kraken'
     url_full = "{}/{}/ohlc?periods={}".format(
         url_base, pair, periods_dict[period])
-    if after == None:
-        url_full = url_full + '&after=1'
+    url_full = url_full + '&after={}'.format(after)
     resp = requests.get(url=url_full)
     data = resp.json()["result"]
     allowance = resp.json()["allowance"]
@@ -51,36 +50,29 @@ def fetch_data(filepath, exchange, pair, period):
     log.info("Opening/Creating store file: {}".format(filepath))
     with h5py.File(filepath, 'a') as f:
         datapath = '/{}/{}/{}'.format(exchange, pair, period)
-        dset = f[datapath]
 
         # Set doesnt exist, we'll create it
-        if dset.shape[0] == 0:
+        if datapath not in f:
             new_data = fetch_pair(pair, period)
-            f.create_dataset(datapath, data=new_data)
+            f.create_dataset(datapath, data=new_data,
+                             maxshape=(None, 7), compression="gzip")
+
         # Set exists, we'll fetch the last data of it, to know after what timestamp to query the data
         else:
+            dset = f[datapath]
             last_row = dset[-1]
-            print(last_row)
-        # Open current CSV file
-        # try:
-        #     existing_data = pd.read_hdf(
-        #         filepath, key=key, index_col="datetime", parse_dates=True)
-        # except FileNotFoundError:
-        #     log.info("Data file does not exist yet")
-        #     pass
-
-        # If theres already data, fetch the date from when the data should be added
-        after = None
-        if existing_data.shape[0] > 0:
-            after_datetime = existing_data.index[-1].to_pydatetime()
-            after = int(datetime.timestamp(after_datetime))
-
-
+            # The '+1' is made to ensure that the last data in the set won't be re-fetched
+            last_timestamp = int(last_row[0])+1
+            new_data = fetch_pair(pair, period, after=last_timestamp)
+            new_data_size = new_data.shape[0]
+            dset.resize(dset.shape[0] + new_data_size, axis=0)
+            dset[-new_data_size:] = new_data
 
 
 '''
 Parses the args according to the usage
 '''
+
 
 def parse_args(pargs=None):
     parser = argparse.ArgumentParser(
@@ -123,7 +115,6 @@ if __name__ == "__main__":
     pair = getattr(args, "symbol")
     period = getattr(args, "period")
     # TODO: delete, for debug only now
-    print("{} {} {} {}".format(filepath, exchange, pair, period))
 
     # Fetch data
     fetch_data(filepath, exchange, pair, period)
