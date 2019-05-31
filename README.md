@@ -8,6 +8,14 @@ Crypto data fetcher is a simple wrapper of the [Cryptowatch REST API](https://cr
 
 I personally use this to on my Raspi to get minutely data of the Kraken OHLCV on the BTC/EUR pair, as I couldn't find any free dataset available. You can setup a cron job to poll the data. Fetched data is limited by Cryptowatch to an history of **6000** ticks, for any period of time (about 4 days ago for 1m data), so keep that in mind when you're setting up your polling period.
 
+## Installation
+
+Install required packages:
+
+```
+pip3 install logging time schedule argparse requests numpy pandas datetime h5py --user
+```
+
 ## Usage
 
 ```
