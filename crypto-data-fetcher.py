@@ -82,7 +82,7 @@ def parse_args(pargs=None):
         )
     )
 
-    parser.add_argument('-f', '--filepath', required=True, type=str,
+    parser.add_argument('-f', '--filepath', required=False, default='store.h5', type=str,
                         help='file path in which to store the fetched data, or on which to complete existing data')
 
     # Defaults for dates

@@ -2,10 +2,10 @@
 
 Crypto data fetcher is a simple wrapper of the [Cryptowatch REST API](https://cryptowat.ch/docs/api) OHLCV endpoint, providing useful features such as:
 
-- Registering fetched data in a hdf5 file
+- Recording fetched data in a hdf5 file
 - Querying only missing data (according to existing h5 records)
 
-I personally use this to on my Raspi to get minutely data of the Kraken OHLCV on the BTC/EUR pair, as I couldn't find any free dataset available. You can setup a cron job to poll the data. Fetched data is limited to an history of **6000** ticks, for any period of time (about 4 days ago for 1m data), so keep that in mind when you're setting up your polling period.
+I personally use this to on my Raspi to get minutely data of the Kraken OHLCV on the BTC/EUR pair, as I couldn't find any free dataset available. You can setup a cron job to poll the data. Fetched data is limited by Cryptowatch to an history of **6000** ticks, for any period of time (about 4 days ago for 1m data), so keep that in mind when you're setting up your polling period.
 
 ## Usage
 
@@ -13,15 +13,15 @@ I personally use this to on my Raspi to get minutely data of the Kraken OHLCV on
 Usage:
 crypto-data-fetcher.py [flags]
   -h, --help                show usage and exit
-  -f, --filepath string     file path in which to store the fetched data, or on which to complete existing data (default ./data/[pair].h5)
+  -f, --filepath string     file path in which to store the fetched data, or on which to complete existing data (default ./store.h5)
   -e, --exchange string     exchange **symbol** on which to fetch the data (exchange listing https://api.cryptowat.ch/exchanges)
   -s, --symbol string       pair symbol for which to fetch the data (find pair listing for every exchange here https://cryptowat.ch/exchanges). Ex: btceur or etheur or zecbtc etc.
   -p, --period string       time period of the data, must be one of: "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", 6h", "12h", "1d", "3d", "1w" (default 1m)
 ```
 
-Usage example: fetch 1-minute data from BTCEUR from kraken
+Usage example: fetch 1-minute BTCEUR data from kraken
 ```
-./crypto-data-fetcher.py -f data/store.h5 -e kraken -s btceur -p 1m
+./crypto-data-fetcher.py -f store.h5 -e kraken -s btceur -p 1m
 ```
 
 ## Storage of the data
@@ -31,11 +31,11 @@ Fetched data is stored in a h5 file as a chunked table using gzip compression (d
 Example:
 Running 
 ```
-./crypto-data-fetcher.py -f data/store.h5 -e kraken -s btceur -p 1m
+./crypto-data-fetcher.py -f store.h5 -e kraken -s btceur -p 1m
 ```
 Then
 ```
-./crypto-data-fetcher.py -f data/store.h5 -e coinbase -s ethusd -p 3m
+./crypto-data-fetcher.py -f store.h5 -e coinbase -s ethusd -p 3m
 ```
 Will both use the same data/store.h5 file, but will store the datasets in ```/kraken/btceur/1m``` and ```/coinbase/ethusd/3m```
 
