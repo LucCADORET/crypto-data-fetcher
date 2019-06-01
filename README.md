@@ -22,9 +22,10 @@ Usage:
 crypto-data-fetcher.py [flags]
   -h, --help                show usage and exit
   -f, --filepath string     file path in which to store the fetched data, or on which to complete existing data (default ./store.h5)
-  -e, --exchange string     exchange **symbol** on which to fetch the data (exchange listing https://api.cryptowat.ch/exchanges)
+  -e, --exchange string     exchange symbol on which to fetch the data (exchange listing https://api.cryptowat.ch/exchanges)
   -s, --symbol string       pair symbol for which to fetch the data (find pair listing for every exchange here https://cryptowat.ch/exchanges). Ex: btceur or etheur or zecbtc etc.
-  -p, --period string       time period of the data, must be one of: "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", 6h", "12h", "1d", "3d", "1w" (default 1m)
+  -p, --period string       time period of the data, must be one of: "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", 6h", "12h", "1d", "3d", "1w"
+  -l, --logfile string      filepath of the logfile in which to write the logs (if none is provided, no log file will be created)
 ```
 
 Usage example: fetch 1-minute BTCEUR data from kraken

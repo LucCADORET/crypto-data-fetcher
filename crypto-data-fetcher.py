@@ -39,7 +39,7 @@ def fetch_pair(exchange, pair, period, after=1):
     resp = requests.get(url=url_full)
     data = resp.json()["result"]
     allowance = resp.json()["allowance"]
-    print("Remaining allowance: {}".format(allowance['remaining']))
+    log.info("Cryptowatch remaining allowance: {}".format(allowance['remaining']))
     df = pd.DataFrame(data[periods_dict[period]], columns=[
                       'time', 'open', 'high', 'low', 'close', 'volume_base', 'volume_quote'])
     return df
@@ -47,13 +47,16 @@ def fetch_pair(exchange, pair, period, after=1):
 
 def fetch_data(filepath, exchange, pair, period):
 
-    log.info("Opening/Creating store file: {}".format(filepath))
+    log.info("Opening store file: {}".format(filepath))
     with h5py.File(filepath, 'a') as f:
         datapath = '/{}/{}/{}'.format(exchange, pair, period)
 
         # Set doesnt exist, we'll create it
         if datapath not in f:
+            log.info("Dataset does not exist yet: creating a new one")
             new_data = fetch_pair(exchange, pair, period)
+            new_data_size = new_data.shape[0]
+            log.info("Added {} new rows".format(new_data_size))
             f.create_dataset(datapath, data=new_data,
                              maxshape=(None, 7), compression="gzip")
 
@@ -68,6 +71,9 @@ def fetch_data(filepath, exchange, pair, period):
             if(new_data_size > 0):
                 dset.resize(dset.shape[0] + new_data_size, axis=0)
                 dset[-new_data_size:] = new_data
+                log.info("Added {} new rows".format(new_data_size))
+    
+    log.info("Data fetching successful!".format(new_data_size))
 
 
 '''
@@ -95,11 +101,24 @@ def parse_args(pargs=None):
 
     parser.add_argument('-p', '--period', required=False, type=str, default='1m',
                         help='time period of the data, must be one of: "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", 6h", "12h", "1d", "3d", "1w"')
+    
+    parser.add_argument('-l', '--logfile', required=False, type=str,
+                        help='filepath of the logfile in which to write the logs (if none is provided, no log file will be created)')
 
     return parser.parse_args(pargs)
 
 
 if __name__ == "__main__":
+
+    # Parse args
+    args = parse_args()
+    filepath = getattr(args, "filepath")
+    exchange = getattr(args, "exchange")
+    pair = getattr(args, "symbol")
+    period = getattr(args, "period")
+    logile = getattr(args, "logfile")
+    # TODO: delete, for debug only now
+
 
     # Setup logging
     log = logging.getLogger("crypto-data-fetcher")
@@ -108,14 +127,10 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     log.addHandler(ch)
     log.setLevel(logging.INFO)
+    fh = logging.FileHandler("{}".format(logile))
+    fh.setFormatter(formatter)
+    log.addHandler(fh)
 
-    # Parse args
-    args = parse_args()
-    filepath = getattr(args, "filepath")
-    exchange = getattr(args, "exchange")
-    pair = getattr(args, "symbol")
-    period = getattr(args, "period")
-    # TODO: delete, for debug only now
 
     # Fetch data
     fetch_data(filepath, exchange, pair, period)
