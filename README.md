@@ -58,3 +58,7 @@ One important thing to know is that the Cryptowatch API timestamps the data rega
 All data is recorded with UTC time.
 
 The Cryptowatch API has a rate limitation of 8 seconds of CPU time per hour. This should be more than enough to fetch data even every minute, but keep that in mind if you ever spam their API. You can query https://api.cryptowat.ch to get your remaining CPU time (in nanoseconds).
+
+## Known issues
+
+If you setup several crontab jobs to fetch the store at the same time (say, every hour), you will probably notice that opening the files often fail, because of concurrency writing/reading of the store file. It seems that it is possible to handle that in a smooth way (see http://docs.h5py.org/en/stable/mpi.html) but I haven't looked into that yet, so that it left for further improvements. For now, you have to shift the cron jobs so that they don't run at the same time, or simply use different store files.
