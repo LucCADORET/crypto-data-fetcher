@@ -133,4 +133,7 @@ if __name__ == "__main__":
         log.addHandler(fh)
 
     # Fetch data
-    fetch_data(filepath, exchange, pair, period)
+    try:
+        fetch_data(filepath, exchange, pair, period)
+    except Exception as e:
+        log.error(e)
