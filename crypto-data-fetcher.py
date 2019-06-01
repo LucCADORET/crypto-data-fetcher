@@ -39,7 +39,8 @@ def fetch_pair(exchange, pair, period, after=1):
     resp = requests.get(url=url_full)
     data = resp.json()["result"]
     allowance = resp.json()["allowance"]
-    log.info("Cryptowatch remaining allowance: {}".format(allowance['remaining']))
+    log.info("Cryptowatch remaining allowance: {}".format(
+        allowance['remaining']))
     df = pd.DataFrame(data[periods_dict[period]], columns=[
                       'time', 'open', 'high', 'low', 'close', 'volume_base', 'volume_quote'])
     return df
@@ -72,7 +73,7 @@ def fetch_data(filepath, exchange, pair, period):
                 dset.resize(dset.shape[0] + new_data_size, axis=0)
                 dset[-new_data_size:] = new_data
                 log.info("Added {} new rows".format(new_data_size))
-    
+
     log.info("Data fetching successful!".format(new_data_size))
 
 
@@ -101,7 +102,7 @@ def parse_args(pargs=None):
 
     parser.add_argument('-p', '--period', required=False, type=str, default='1m',
                         help='time period of the data, must be one of: "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", 6h", "12h", "1d", "3d", "1w"')
-    
+
     parser.add_argument('-l', '--logfile', required=False, type=str,
                         help='filepath of the logfile in which to write the logs (if none is provided, no log file will be created)')
 
@@ -116,9 +117,8 @@ if __name__ == "__main__":
     exchange = getattr(args, "exchange")
     pair = getattr(args, "symbol")
     period = getattr(args, "period")
-    logile = getattr(args, "logfile")
+    logfile = getattr(args, "logfile")
     # TODO: delete, for debug only now
-
 
     # Setup logging
     log = logging.getLogger("crypto-data-fetcher")
@@ -127,10 +127,10 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     log.addHandler(ch)
     log.setLevel(logging.INFO)
-    fh = logging.FileHandler("{}".format(logile))
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
-
+    if(logfile != None):
+        fh = logging.FileHandler("{}".format(logfile))
+        fh.setFormatter(formatter)
+        log.addHandler(fh)
 
     # Fetch data
     fetch_data(filepath, exchange, pair, period)
